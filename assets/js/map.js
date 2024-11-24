@@ -7,7 +7,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Capa para los puntos
-let pointLayer = L.layerGroup().addTo(map); // Aseguramos que los puntos se agreguen a esta capa
+let pointLayer = L.layerGroup(); // Crea una capa de puntos vacía para agregar marcadores
+
+// Almacén de puntos para generar el control de capas dinámicamente
+let points = [];
 
 // Función para insertar un punto al hacer clic
 map.on('click', function(e) {
@@ -37,50 +40,60 @@ function savePoint(lat, lng, timestamp) {
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
 
-    // Aquí se guardan los datos en la base de datos (usando fetch para conectarse al servidor)
-    fetch('/savePoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            title: title,
-            description: description,
-            lat: lat,
-            lng: lng,
-            timestamp: timestamp
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Crear marcador con popup de información
-        const newPoint = L.marker([lat, lng]).bindPopup(`
-            <b>${title}</b><br>${description}<br>${lat}, ${lng}<br>${timestamp}
-        `);
-        newPoint.addTo(pointLayer); // Agregar al layer de puntos
+    // Crear marcador con popup de información
+    const newPoint = L.marker([lat, lng]).bindPopup(`
+        <b>Título<b>:${title}<br>
+        <b>Descripción</b>:${description}<br>
+        <b>Coordenadas</b>:${lat}, ${lng}<br>
+        <b>Fecha</b>:${timestamp}
+    `);
+      // Agregar el marcador a la capa de puntos
+    pointLayer.addLayer(newPoint);
 
-        // Cerrar popup después de guardar
-        map.closePopup();
+      // Guardar el punto en la lista de puntos para control de capas
+    points.push({ title, layer: newPoint });
 
-        // Mostrar el punto en el control de capas
-        updateLayerControl();
-    })
-    .catch(error => console.error('Error al guardar el punto:', error));
+      // Actualizar el control de capas
+    updateLayerControl();
+
+      // Forzar actualización del mapa para que el punto se renderice de inmediato
+    map.invalidateSize();
+
+      // Cerrar el popup después de guardar
+    map.closePopup();
 }
 
 // Función para actualizar el control de capas
 function updateLayerControl() {
-    var baseMaps = {
-        "Mapa Base": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; Dann LeBeau'
-        })
-    };
+    // Limpiar el contenido del control de capas
+    const layerControlDiv = document.getElementById('layer-control');
+    layerControlDiv.innerHTML = '<h3>Control de Capas</h3>'; // Restablecer el encabezado
 
-    var overlays = {
-        "Puntos": pointLayer // Agregar los puntos a la capa de control
-    };
+    // Agregar dinámicamente los puntos al control de capas
+    points.forEach((point, index) => {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `layer${index}`;
+        checkbox.checked = true;
+        checkbox.addEventListener('change', () => togglePointLayer(index, checkbox.checked));
 
-    L.control.layers(baseMaps, overlays).addTo(map);
+        const label = document.createElement('label');
+        label.innerHTML = point.title;
+        label.prepend(checkbox);
+
+        layerControlDiv.appendChild(label);
+        layerControlDiv.appendChild(document.createElement('br'));
+    });
+}
+
+// Función para activar o desactivar un punto en el mapa
+function togglePointLayer(index, isChecked) {
+    const point = points[index];
+    if (isChecked) {
+        point.layer.addTo(map);
+    } else {
+        map.removeLayer(point.layer);
+    }
 }
 
 // Exportar datos a GeoJSON
