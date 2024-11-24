@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Metadatos -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Dann LeBeau">
+    <meta name="description" content="Mapa del delito">
+    <meta name="keywords" content="Mapa del delito, delito, inseguridad, geografia, seguridad, Oportunidades">
+    <meta name="robots" content="index, follow"/>
+    <title>Mapa del Delito</title>
+
+    <!-- Iconos desde Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+    <!-- Incluir CSS de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+
+    <!-- Incluir Leaflet Heat CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.heat/dist/leaflet-heat.css" />
+</head>
+<body>
+    <div id="sidebar">
+        <div class="panel" id="date-filter">
+            <h3>Commune by Geopolis</h3>
+        </div>
+
+        <div class="panel" id="date-filter">
+            <h3>Filtro por Fecha</h3>
+            <label for="start-date">Desde:</label>
+            <input type="date" id="start-date">
+            <label for="end-date">Hasta:</label>
+            <input type="date" id="end-date">
+            <button id="apply-date-filter">Aplicar Filtro</button>
+        </div>
+        
+        <div class="panel" id="layer-control">
+            <h3>Control de Capas</h3>
+            <label><input type="checkbox" id="layer1" checked> Capa 1</label><br>
+            <label><input type="checkbox" id="layer2" checked> Capa 2</label><br>
+        </div>
+        
+        <div class="panel" id="export-options">
+            <h3>Exportar Datos</h3>
+            <button id="export-geojson">Exportar a GeoJSON</button>
+            <button id="export-csv">Exportar a CSV</button>
+            <button id="export-kml">Exportar a KML</button>
+        </div>
+
+        <div class="panel" id="export-options">
+            <h3>Fuente</h3>
+            <a>Elaborado por Dann LeBeau</a>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+
+    <!-- Incluir la librería Leaflet.js (solo una vez) -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <!-- Incluir Leaflet Heat JS (una vez) -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/leaflet-heat.js"></script>
+
+    <!-- Incluir Leaflet Control Geocoder (si lo necesitas) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <!-- Tu archivo map.js -->
+    <script src="./assets/js/map.js"></script>
+</body>
+</html>
