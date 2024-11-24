@@ -35,32 +35,46 @@ map.on('click', function(e) {
         .openOn(map);
 });
 
-// Guardar punto y actualizar la capa de puntos
 function savePoint(lat, lng, timestamp) {
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
 
-    // Crear marcador con popup de información
-    const newPoint = L.marker([lat, lng]).bindPopup(`
-        <b>Título<b>:${title}<br>
-        <b>Descripción</b>:${description}<br>
-        <b>Coordenadas</b>:${lat}, ${lng}<br>
-        <b>Fecha</b>:${timestamp}
-    `);
-      // Agregar el marcador a la capa de puntos
-    pointLayer.addLayer(newPoint);
+    // Guardar los datos en el servidor
+    fetch('/savePoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            title: title,
+            description: description,
+            lat: lat,
+            lng: lng,
+            timestamp: timestamp
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Crear el marcador con el popup
+        const newPoint = L.marker([lat, lng]).bindPopup(`
+            <b>Título:</b> ${title}<br>
+            <b>Descripción:</b> ${description}<br>
+            <b>Coordenadas:</b> ${lat}, ${lng}<br>
+            <b>Fecha:</b> ${timestamp}
+        `);
+        pointLayer.addLayer(newPoint); // Agregar al layer de puntos
 
-      // Guardar el punto en la lista de puntos para control de capas
-    points.push({ title, layer: newPoint });
+        // Quitar y volver a agregar la capa al mapa para forzar el refresco
+        map.removeLayer(pointLayer);
+        map.addLayer(pointLayer);
 
-      // Actualizar el control de capas
-    updateLayerControl();
+        // Cerrar el popup después de guardar
+        map.closePopup();
 
-      // Forzar actualización del mapa para que el punto se renderice de inmediato
-    map.invalidateSize();
-
-      // Cerrar el popup después de guardar
-    map.closePopup();
+        // Actualizar el control de capas
+        updateLayerControl();
+    })
+    .catch(error => console.error('Error al guardar el punto:', error));
 }
 
 // Función para actualizar el control de capas
@@ -125,3 +139,26 @@ document.getElementById('export-csv').addEventListener('click', () => {
     link.download = 'puntos.csv';
     link.click();
 });
+
+fetch('/savePoint', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        title: title,
+        description: description,
+        lat: lat,
+        lng: lng,
+        timestamp: timestamp
+    })
+})
+.then(response => response.json())
+.then(data => {
+    if (data.success) {
+        console.log('Punto guardado correctamente:', data.point);
+    } else {
+        console.error('Error al guardar el punto en el servidor:', data.message);
+    }
+})
+.catch(error => console.error('Error al comunicarse con el servidor:', error));
